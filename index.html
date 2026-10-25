@@ -159,10 +159,49 @@
     border-radius:11px;font-size:14px;box-shadow:0 8px 26px rgba(0,0,0,.28);z-index:100;opacity:0;pointer-events:none;transition:.25s}
   .toast.show{opacity:1;bottom:34px}
 
+  /* ===== تقرير ولي الأمر ===== */
+  table.kashf .col-par{width:58px}
+  .pbtn{border:1.5px solid var(--teal);background:#fff;color:var(--teal-d);border-radius:9px;padding:3px 0;width:46px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:700}
+  .pbtn:hover{background:var(--teal-l)}
+  .pbtn.sent{background:var(--teal-l)}
+  .modal{position:fixed;inset:0;background:rgba(20,40,36,.55);z-index:90;display:none;align-items:flex-start;justify-content:center;padding:30px 12px;overflow:auto}
+  .modal.open{display:flex}
+  .modal .box{background:#fff;border-radius:16px;max-width:640px;width:100%;padding:20px 20px 16px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+  .modal h3{margin:0 0 4px;color:var(--teal-d);font-size:18px;display:flex;align-items:center;gap:8px}
+  .modal .x{margin-right:auto;border:none;background:none;font-size:22px;cursor:pointer;color:var(--muted)}
+  .pr{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:12px}
+  .pr .nm2{font-weight:800;margin-bottom:6px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .pr .nm2 span{font-weight:600;color:var(--muted);font-size:13px}
+  .pr textarea{min-height:0;height:58px;line-height:1.6;font-size:13px;padding:8px 10px}
+  .pr .btn-row{margin-top:8px;gap:8px}
+  .btn-wa{background:#1f9d55;color:#fff}.btn-wa:hover{background:#178246}
+  .modal .privacy{font-size:12px;color:var(--muted);background:var(--teal-xl);border-radius:10px;padding:8px 10px;margin-top:10px}
+  #repHost{display:none}
+  .rep{background:#fff;padding:0;direction:rtl}
+  .rep .rh{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--teal);padding-bottom:8px;margin-bottom:12px}
+  .rep .rh img{height:56px;width:auto}
+  .rep .rh .o{font-size:12px;font-weight:600;line-height:1.6}
+  .rep .rt{display:inline-block;background:var(--teal);color:#fff;font-weight:800;font-size:18px;padding:5px 22px;border-radius:12px;border:2px solid var(--gold)}
+  .rep .rn{font-size:24px;font-weight:800;margin:10px 0 2px}
+  .rep .rm{font-size:13px;color:#555;margin-bottom:12px}
+  .rep table{width:100%;border-collapse:collapse;font-size:14px}
+  .rep th,.rep td{border:1px solid #9ec7bf;padding:7px 10px;text-align:center}
+  .rep th{background:var(--teal);color:#fff}
+  .rep td:first-child{text-align:right}
+  .rep tr.g td{background:var(--teal-l);font-weight:800;color:var(--teal-d)}
+  .rep .tot{display:flex;gap:30px;margin:14px 0;font-size:16px;font-weight:800}
+  .rep .tot b{color:var(--teal-d)}
+  .rep .nt{border:1px solid var(--gold-l);background:#fffaf0;border-radius:10px;padding:10px 14px;white-space:pre-line;margin-top:10px}
+  .rep .sg{display:flex;justify-content:space-between;margin-top:40px;font-weight:700;color:var(--teal-d)}
+  @page rep{size:A4 portrait;margin:14mm}
   @media print{
+    body.print-reps .wrap{display:none !important}
+    body.print-reps #repHost{display:block}
+    .rep{page:rep;break-after:page}
+    .rep:last-child{break-after:auto}
     @page{size:A4 landscape;margin:7mm}
     body{background:#fff}
-    .appbar,#formCard,.toolbar,.no-print,.page-note{display:none !important}
+    .appbar,#formCard,.toolbar,.no-print,.page-note,.modal{display:none !important}
     .wrap{margin:0;padding:0;max-width:none}
     .sheet-scroll{box-shadow:none;padding:0;overflow:visible;background:#fff}
     .sheet{width:100%;margin:0;box-shadow:none;border-radius:0;page-break-after:always}
@@ -241,6 +280,7 @@
   <!-- ============ TOOLBAR ============ -->
   <div class="toolbar no-print" id="toolbar" style="display:none">
     <button class="btn btn-ghost btn-sm" onclick="addRow()">＋ طالب</button>
+    <button class="btn btn-ghost btn-sm" onclick="openParent()">📤 روابط أولياء الأمور</button>
     <span class="sep"></span>
     <span class="hint" style="font-size:13px;color:var(--muted)">استخدم زر «⬇ تصدير» في الأعلى لحفظ الكشف</span>
     <span class="count" id="countLbl"></span>
@@ -255,6 +295,17 @@
   </div>
 </div>
 
+<div class="modal" id="parentModal" onclick="if(event.target===this)closeParent()">
+  <div class="box">
+    <h3>📤 تقرير ولي الأمر <button class="x" onclick="closeParent()" aria-label="إغلاق">×</button></h3>
+    <p class="hint" style="margin:0">لكل طالب رابط فيه درجاته هو فقط. أرسله لولي الأمر بالواتساب، ويفتحه من جواله بدون تسجيل.</p>
+    <div class="btn-row" id="repAll" style="margin-top:12px"><button class="btn btn-pdf btn-sm" onclick="printReports()">🖨 تقارير الطلاب PDF — صفحة لكل طالب</button></div>
+    <div id="parentList"></div>
+    <div class="privacy">🔒 بيانات التقرير داخل الرابط نفسه ولا تُرفع لأي خادم، وما يقدر ولي الأمر يشوف بقية الطلاب. الرابط يعرض الدرجات وقت إرساله — إذا عدّلت الدرجات أرسل رابطاً جديداً.</div>
+  </div>
+</div>
+
+<div id="repHost"></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -391,13 +442,13 @@ function tableHTML(start,end,m,pageNo,pages){
     top+=`<th colspan="${g.cols.length}">${esc(g.name)} <span style="font-weight:400;font-size:11px">(${groupMax(g)} درجة)</span></th>`;
     g.cols.forEach(c=>{sub+=`<th>${esc(c.name)}<br><span style="font-weight:400">${c.max} درجات</span></th>`;});
   });
-  top+=`<th class="col-total" rowspan="2">المجموع<br><span style="font-weight:400;font-size:11px">${grandMax()} درجة</span></th>`;
+  top+=`<th class="col-total" rowspan="2">المجموع<br><span style="font-weight:400;font-size:11px">${grandMax()} درجة</span></th><th class="col-par no-print" rowspan="2">ولي الأمر</th>`;
   let body='';
   for(let i=start;i<end;i++){
     const st=students[i]; let cells='', ci=0;
     groups.forEach((g,gi)=>{g.cols.forEach(c=>{const v=st.marks[ci]??'';
       cells+=`<td class="grp-${gk[gi%3]}"><input class="g" data-row="${i}" data-col="${ci}" inputmode="decimal" value="${esc(String(v))}" max="${c.max}"></td>`;ci++;});});
-    body+=`<tr><td>${toArabic(i+1)}</td><td class="name-cell"><input class="nm" data-row="${i}" value="${esc(st.name)}"></td>${cells}<td class="total-cell" id="tot-${i}">${rowTotal(st)}</td></tr>`;
+    body+=`<tr><td>${toArabic(i+1)}</td><td class="name-cell"><input class="nm" data-row="${i}" value="${esc(st.name)}"></td>${cells}<td class="total-cell" id="tot-${i}">${rowTotal(st)}</td><td class="no-print"><button class="pbtn${st.sent?' sent':''}" onclick="openParent(${i})" title="إرسال تقرير الطالب لولي الأمر">📤</button></td></tr>`;
   }
   return `<table class="kashf"><thead><tr>${top}</tr><tr class="sub">${sub}</tr></thead><tbody>${body}</tbody></table>
     <div class="sheet-foot"><span>${m.teacher?'معلم المادة: '+esc(m.teacher):''}</span><span>${m.principal?'مدير المدرسة: '+esc(m.principal):''}</span><span>صفحة ${toArabic(pageNo)} من ${toArabic(pages)}</span></div>`;
@@ -617,6 +668,57 @@ function exportPPT(){
   }
   pptx.writeFile({fileName:fileName()+'.pptx'}); toast('تم تصدير PowerPoint');
 }
+
+/* ===================== تقرير ولي الأمر ===================== */
+// الرابط: r.html#<base64url(JSON)> — الجزء بعد # لا يُرسل للخادم، فالتقرير يبقى بين المعلم وولي الأمر
+let parentIdx=[];
+function reportData(i){
+  const st=students[i],m=meta();let ci=0;
+  return {v:1,n:st.name,sc:m.school,su:m.subject,g:m.grade,t:m.term,y:m.year,te:m.teacher,no:(st.note||'').trim(),d:Math.floor(Date.now()/1000),
+    gr:groups.map(g=>[g.name,g.cols.map(c=>[c.name,+c.max||0,st.marks[ci++]??''])])};
+}
+function b64url(str){const b=new TextEncoder().encode(str);let s='';for(let i=0;i<b.length;i+=8192)s+=String.fromCharCode.apply(null,b.subarray(i,i+8192));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+function reportLink(i){return new URL('r.html',location.href).href.split('#')[0]+'#'+b64url(JSON.stringify(reportData(i)));}
+function waText(i){const st=students[i],m=meta();
+  return `السلام عليكم ورحمة الله\nولي أمر الطالب: ${st.name}\nهذا تقرير متابعة ابنكم في مادة ${m.subject}${m.term?(' — '+m.term):''}:\n${reportLink(i)}${m.teacher?('\n\n'+m.teacher):''}`;}
+function openParent(i){
+  if(!students.length){toast('أنشئ الكشف أولاً');return;}
+  parentIdx=i==null?students.map((_,k)=>k).filter(k=>students[k].name.trim()):[i];
+  $('parentList').innerHTML=parentIdx.map(k=>{const st=students[k];const t=rowTotal(st);
+    return `<div class="pr"><div class="nm2">${toArabic(k+1)}. ${esc(st.name)||'—'} <span>المجموع: ${t===''?'لم يُرصد':toArabic(t)+' من '+toArabic(grandMax())}${st.sent?' · ✓ أُرسل':''}</span></div>
+      <textarea placeholder="ملاحظة المعلم لولي الأمر (اختياري) — تظهر في التقرير" oninput="students[${k}].note=this.value;saveState()">${esc(st.note||'')}</textarea>
+      <div class="btn-row"><button class="btn btn-wa btn-sm" onclick="sendWA(${k})">واتساب</button><button class="btn btn-ghost btn-sm" onclick="copyLink(${k})">نسخ الرابط</button><button class="btn btn-ghost btn-sm" onclick="window.open(reportLink(${k}),'_blank')">معاينة</button></div></div>`;}).join('')||'<p class="hint">لا يوجد طلاب.</p>';
+  $('repAll').firstElementChild.textContent=parentIdx.length>1?'🖨 تقارير الطلاب PDF — صفحة لكل طالب':'🖨 تقرير الطالب PDF';
+  $('parentModal').classList.add('open');
+}
+function levelOf(p){return p>=90?'ممتاز':p>=80?'جيد جداً':p>=65?'جيد':p>=50?'مقبول':'يحتاج إلى دعم ومتابعة';}
+function reportPageHTML(k){
+  const st=students[k],m=meta();let ci=0,rows='';
+  groups.forEach(g=>{let gt=0;const cr=g.cols.map(c=>{const v=st.marks[ci++]??'';const n=parseFloat(v);const ok=v!==''&&!isNaN(n);if(ok)gt+=Math.min(n,+c.max||0);
+      return `<tr><td>${esc(c.name)}</td><td>${toArabic(c.max)}</td><td>${ok?toArabic(Math.min(n,+c.max||0)):'—'}</td></tr>`;}).join('');
+    rows+=`<tr class="g"><td>${esc(g.name)}</td><td>${toArabic(groupMax(g))}</td><td>${toArabic(Math.round(gt*10)/10)}</td></tr>`+cr;});
+  const t=rowTotal(st),mx=grandMax(),pct=t===''||!mx?null:t/mx*100;
+  return `<div class="rep"><div class="rh"><div class="o">المملكة العربية السعودية<br><b>وزارة التعليم</b><br>${esc(m.admin)}${m.school?'<br>'+esc(m.school):''}</div>${moeLogoSVG(110)}</div>
+    <span class="rt">تقرير متابعة الطالب</span><div class="rn">${esc(st.name)}</div>
+    <div class="rm">المادة: ${esc(m.subject)}${m.grade?' · الصف: '+esc(m.grade):''}${m.term?' · '+esc(m.term):''}${m.year?' · '+esc(m.year):''}</div>
+    <table><thead><tr><th>المعيار</th><th>الدرجة العظمى</th><th>درجة الطالب</th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="tot"><span>المجموع: <b>${t===''?'—':toArabic(t)} من ${toArabic(mx)}</b></span>${pct==null?'':`<span>المستوى: <b>${levelOf(pct)}</b></span>`}</div>
+    ${st.note?`<div class="nt"><b>ملاحظة المعلم:</b>\n${esc(st.note)}</div>`:''}
+    <div class="sg"><span>معلم المادة: ${esc(m.teacher)||'..............'}</span><span>ولي الأمر: ..............</span></div></div>`;
+}
+function printReports(){
+  const idx=parentIdx.length?parentIdx:students.map((_,k)=>k);
+  $('repHost').innerHTML=idx.filter(k=>students[k].name.trim()).map(reportPageHTML).join('');
+  document.body.classList.add('print-reps');closeParent();toast('اختر «حفظ كـ PDF» في نافذة الطباعة');
+  setTimeout(()=>{window.print();},350);
+}
+addEventListener('afterprint',()=>{document.body.classList.remove('print-reps');$('repHost').innerHTML='';});
+function closeParent(){$('parentModal').classList.remove('open');}
+function markSent(k){students[k].sent=1;saveState();const b=document.querySelector(`.pbtn[onclick="openParent(${k})"]`);if(b)b.classList.add('sent');}
+function sendWA(k){window.open('https://wa.me/?text='+encodeURIComponent(waText(k)),'_blank');markSent(k);}
+function copyLink(k){const t=waText(k);
+  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('نُسخت الرسالة مع الرابط')).catch(()=>{prompt('انسخ الرسالة:',t)});markSent(k);}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeParent();});
 
 /* ===================== Export menu ===================== */
 function toggleExportMenu(){$('exportMenu').classList.toggle('open');}
