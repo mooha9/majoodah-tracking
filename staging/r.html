@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>تقرير متابعة الطالب</title>
+<link rel="icon" type="image/png" href="/favicon.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#2c6b60">
+<script src="logos.js"></script>
+<style>
+  :root{--teal:#3f8d80;--teal-d:#2c6b60;--teal-l:#e6f3f0;--teal-xl:#f3faf8;--gold:#bd9e63;--gold-l:#e7d9bd;--ink:#1f312d;--muted:#6f817c;--line:#cde0db;--bg:#eaf1ef}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI",Tahoma,"Noto Naskh Arabic",Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+  .wrap{max-width:620px;margin:0 auto;padding:16px 16px 40px}
+  .card{background:#fff;border-radius:18px;box-shadow:0 6px 22px rgba(35,80,72,.10);border:1px solid #e3ece9;padding:20px;margin-bottom:14px}
+  .head{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:2px solid var(--teal);padding-bottom:12px;margin-bottom:14px}
+  .head img{height:46px;width:auto;display:block}
+  .head .org{font-size:12px;color:#3a4b47;font-weight:600;line-height:1.6}
+  .head .org b{color:var(--teal-d)}
+  .title{display:inline-block;background:var(--teal);color:#fff;font-weight:800;font-size:18px;padding:6px 20px;border-radius:12px;border:2px solid var(--gold)}
+  .stname{font-size:24px;font-weight:800;margin:14px 0 2px}
+  .meta{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);font-weight:600}
+  .meta b{color:var(--teal-d)}
+  .score{display:flex;align-items:center;gap:18px;margin-top:4px}
+  .ring{--p:0;width:118px;height:118px;border-radius:50%;flex:none;display:grid;place-items:center;
+    background:conic-gradient(var(--c,var(--teal)) calc(var(--p)*1%),var(--teal-l) 0)}
+  .ring>div{width:92px;height:92px;border-radius:50%;background:#fff;display:grid;place-items:center;text-align:center;line-height:1.2}
+  .ring b{font-size:26px;color:var(--ink)}
+  .ring small{font-size:12px;color:var(--muted)}
+  .lvl{font-size:22px;font-weight:800}
+  .sub{font-size:13px;color:var(--muted)}
+  h2{font-size:16px;color:var(--teal-d);margin:0 0 10px}
+  .grp{margin-bottom:16px}
+  .grp:last-child{margin-bottom:0}
+  .gh{display:flex;justify-content:space-between;font-weight:800;font-size:14.5px;margin-bottom:6px}
+  .bar{height:9px;background:var(--teal-l);border-radius:9px;overflow:hidden;margin-bottom:8px}
+  .bar i{display:block;height:100%;background:var(--teal);border-radius:9px}
+  .crit{display:flex;justify-content:space-between;font-size:14px;padding:6px 10px;border-radius:9px}
+  .crit:nth-child(odd){background:var(--teal-xl)}
+  .crit span:last-child{font-weight:700}
+  .na{color:#a3b0ad;font-weight:600 !important}
+  .note{background:#fffaf0;border:1px solid var(--gold-l);border-radius:14px;padding:14px 16px;white-space:pre-line}
+  .note b{display:block;color:#8a6d2f;margin-bottom:4px}
+  .foot{font-size:12px;color:var(--muted);text-align:center;margin-top:6px}
+  .actions{display:flex;gap:10px;justify-content:center;margin:6px 0 4px}
+  .btn{border:1.5px solid var(--teal);background:#fff;color:var(--teal-d);border-radius:11px;padding:9px 18px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;text-decoration:none}
+  .brand{display:flex;align-items:center;justify-content:center;gap:8px;font-size:12.5px;color:var(--muted);margin-top:18px;text-decoration:none}
+  .brand img{height:26px;width:auto;background:#fff;border-radius:6px;padding:2px 6px}
+  .err{text-align:center;padding:40px 20px;color:var(--muted)}
+  @media print{body{background:#fff}.actions,.brand{display:none}.card{box-shadow:none;break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+const $=id=>document.getElementById(id);
+const AR=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=n=>AR(Math.round(n*10)/10);
+function decode(h){h=h.replace(/-/g,'+').replace(/_/g,'/');while(h.length%4)h+='=';const b=atob(h);const u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return JSON.parse(new TextDecoder().decode(u));}
+function level(p){
+  if(p>=90)return ['ممتاز','#2c6b60'];if(p>=80)return ['جيد جداً','#3f8d80'];if(p>=65)return ['جيد','#bd9e63'];
+  if(p>=50)return ['مقبول','#d08b3a'];return ['يحتاج إلى دعم ومتابعة','#c0563b'];
+}
+function render(){
+  let D;
+  try{D=decode(location.hash.slice(1));if(!D||!D.gr)throw 0;}
+  catch(e){$('app').innerHTML='<div class="card err">الرابط غير مكتمل. اطلب من المعلم إرسال رابط التقرير مرة أخرى.</div>';return;}
+  document.title='تقرير متابعة — '+D.n;
+  let tot=0,max=0,miss=0;
+  const groups=D.gr.map(([gn,cols])=>{let gt=0,gm=0,gHas=false;
+    const rows=cols.map(([cn,cm,v])=>{gm+=cm;const n=parseFloat(v);const has=v!==''&&!isNaN(n);if(has){gt+=Math.min(n,cm);gHas=true;}else miss++;
+      return `<div class="crit"><span>${esc(cn)}</span><span class="${has?'':'na'}">${has?fmt(Math.min(n,cm))+' / '+AR(cm):'لم تُرصد'}</span></div>`;}).join('');
+    tot+=gt;max+=gm;
+    return `<div class="grp"><div class="gh"><span>${esc(gn)}</span><span>${gHas?fmt(gt):'—'} / ${AR(gm)}</span></div><div class="bar"><i style="width:${gm?Math.round(gt/gm*100):0}%"></i></div>${rows}</div>`;}).join('');
+  const pct=max?tot/max*100:0;const [lv,col]=level(pct);
+  const dt=D.d?new Date(D.d*1000):null;
+  let dts='';try{dts=dt?dt.toLocaleDateString('ar-SA-u-ca-islamic-umalqura',{day:'numeric',month:'long',year:'numeric'}):''}catch(e){}
+  const moe=window.LOGO_MOE?`<img src="${window.LOGO_MOE}" alt="وزارة التعليم">`:'';
+  $('app').innerHTML=`
+  <div class="card">
+    <div class="head"><div class="org">المملكة العربية السعودية<br><b>وزارة التعليم</b>${D.sc?'<br>'+esc(D.sc):''}</div>${moe}</div>
+    <span class="title">تقرير متابعة الطالب</span>
+    <div class="stname">${esc(D.n)}</div>
+    <div class="meta">${D.su?`<span><b>المادة:</b> ${esc(D.su)}</span>`:''}${D.g?`<span><b>الصف:</b> ${esc(D.g)}</span>`:''}${D.t?`<span><b>${esc(D.t)}</b></span>`:''}${D.y?`<span>${esc(D.y)}</span>`:''}</div>
+  </div>
+  <div class="card">
+    <div class="score">
+      <div class="ring" style="--p:${Math.round(pct)};--c:${col}"><div><div><b>${fmt(tot)}</b><br><small>من ${AR(max)}</small></div></div></div>
+      <div><div class="sub">المستوى العام</div><div class="lvl" style="color:${col}">${lv}</div><div class="sub">النسبة ${fmt(pct)}٪${miss?' — بعض الدرجات لم تُرصد بعد':''}</div></div>
+    </div>
+  </div>
+  <div class="card"><h2>تفاصيل الدرجات</h2>${groups}</div>
+  ${D.no?`<div class="card note"><b>ملاحظة المعلم${D.te?' — '+esc(D.te):''}</b>${esc(D.no)}</div>`:''}
+  <div class="foot">${D.te&&!D.no?'معلم المادة: '+esc(D.te)+' · ':''}${dts?'التقرير بتاريخ '+dts+' — ':''}يعرض الدرجات وقت إرساله</div>
+  <div class="actions"><button class="btn" onclick="print()">حفظ PDF / طباعة</button></div>
+  <a class="brand" href="https://majoodah.com" target="_blank" rel="noopener">${window.LOGO_MUJAWWADA?`<img src="${window.LOGO_MUJAWWADA}" alt="">`:''}أُنشئ بأداة كشف المتابعة من مجودة</a>`;
+}
+render();addEventListener('hashchange',render);
+</script>
+</body>
+</html>
